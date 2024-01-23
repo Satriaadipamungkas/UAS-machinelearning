@@ -1,0 +1,51 @@
+
+
+import requests
+from bs4 import BeautifulSoup
+import matplotlib.pyplot as plt
+from wordcloud import WordCloud
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+from nltk.probability import FreqDist
+from textblob import TextBlob
+
+# Mendapatkan teks dari URL
+url = "https://shared.djambred.my.id/uas-nim-ganjil.txt"
+response = requests.get(url)
+text = response.text
+
+# Tokenisasi teks dan hapus stopwords
+words = word_tokenize(text.lower())
+stop_words = set(stopwords.words("indonesian"))
+filtered_words = [word for word in words if word.isalpha() and word not in stop_words]
+
+# Membuat WordCloud
+wordcloud = WordCloud(width=800, height=400, background_color='white').generate(" ".join(filtered_words))
+
+# Menampilkan WordCloud
+plt.figure(figsize=(10, 5))
+plt.imshow(wordcloud, interpolation='bilinear')
+plt.axis("off")
+plt.title("Word Cloud")
+plt.show()
+
+# Plot Frekuensi Kata
+fdist = FreqDist(filtered_words)
+plt.figure(figsize=(12, 6))
+fdist.plot(30, cumulative=False)
+plt.title('Top 30 Kata yang Paling Sering Digunakan')
+plt.show()
+
+# Analisis Sentimen
+blob = TextBlob(text)
+sentiment_score = blob.sentiment.polarity
+
+# Plot Analisis Sentimen
+plt.figure(figsize=(6, 4))
+plt.bar(['Negatif', 'Netral', 'Positif'], [blob.sentiment.polarity, 0, 1 - blob.sentiment.polarity], color=['red', 'gray', 'green'])
+plt.title('Analisis Sentimen')
+plt.ylabel('Skor Sentimen')
+plt.show()
+
+print(f"Skor Sentimen: {sentiment_score}")
+
